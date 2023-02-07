@@ -11,6 +11,8 @@ jobs:
       - pytest
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  triggers:
+  - !PullRequestUpdateTrigger {}
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
