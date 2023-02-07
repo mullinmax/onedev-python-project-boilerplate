@@ -2,15 +2,26 @@ version: 19
 jobs:
 - name: test
   steps:
+  - !CheckoutStep
+    name: Checkout Code
+    cloneCredential: !DefaultCredential {}
+    withLfs: true
+    withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: pytest
+    name: Run Pytest
     runInContainer: true
-    image: python
+    image: python:3.10
     interpreter: !DefaultInterpreter
       commands:
       - pip install -U pytest
       - pytest
     useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: Build Docker Image
+    tags: dev
+    publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
