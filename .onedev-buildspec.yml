@@ -1,0 +1,17 @@
+version: 19
+jobs:
+- name: test
+  steps:
+  - !CommandStep
+    name: pytest
+    runInContainer: true
+    image: ubuntu
+    interpreter: !DefaultInterpreter
+      commands:
+      - pytest
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
