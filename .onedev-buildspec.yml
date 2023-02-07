@@ -5,10 +5,9 @@ jobs:
   - !CommandStep
     name: pytest
     runInContainer: true
-    image: ubuntu
+    image: python
     interpreter: !DefaultInterpreter
       commands:
-      - pip install -U pytest
       - pytest
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
