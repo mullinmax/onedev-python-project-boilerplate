@@ -1,12 +1,10 @@
 version: 19
 jobs:
-- name: test
+- name: Test
   steps:
-  - !CheckoutStep
-    name: Checkout Code
-    cloneCredential: !DefaultCredential {}
-    withLfs: true
-    withSubmodules: true
+  - !UseTemplateStep
+    name: Extract Versions
+    templateName: checkout and extract versions
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Run Pytest
@@ -30,7 +28,7 @@ jobs:
   retryDelay: 30
   timeout: 3600
 stepTemplates:
-- name: get_required_python_version
+- name: checkout and extract versions
   steps:
   - !CheckoutStep
     name: Checkout Code
@@ -40,12 +38,12 @@ stepTemplates:
     checkoutPath: ./src/
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: Extract Minimum Python version
+    name: Extract Versions
     runInContainer: true
     image: ubuntu
     interpreter: !DefaultInterpreter
       commands:
-      - python_version=$(grep 'python_requires' "./src/setup.py" | awk -F\' '{print
-        $2}')
+      - grep 'python_requires' "./src/setup.py" | awk -F\' '{print $2}' > ./minimum_python_version.txt
+      - grep 'version' "./src/setup.py" | awk -F\' '{print $2}' > ./package_version.txt
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
