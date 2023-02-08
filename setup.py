@@ -8,6 +8,7 @@ setup(
     description='A brief description of your project',
     author='Maxwell Mullin',
     author_email='mullinmax@gmail.com',
+	python_requires='>=3.6',
     install_requires=[
         pytest
     ],
