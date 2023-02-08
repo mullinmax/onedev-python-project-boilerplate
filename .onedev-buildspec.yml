@@ -29,3 +29,23 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+stepTemplates:
+- name: get_required_python_version
+  steps:
+  - !CheckoutStep
+    name: Checkout Code
+    cloneCredential: !DefaultCredential {}
+    withLfs: false
+    withSubmodules: false
+    checkoutPath: ./src/
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Extract Minimum Python version
+    runInContainer: true
+    image: ubuntu
+    interpreter: !DefaultInterpreter
+      commands:
+      - python_version=$(grep 'python_requires' "./src/setup.py" | awk -F\' '{print
+        $2}')
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
