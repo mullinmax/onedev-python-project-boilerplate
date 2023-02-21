@@ -38,6 +38,10 @@ stepTemplates:
     withLfs: true
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: Set Build Version From Setup.py
+    buildVersion: '@script:Python Get Version From Setup.py@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
   - !UseTemplateStep
@@ -62,6 +66,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Container
-    tags: commit:@commit_hash@ pull_request:@pull_request_number@
+    tags: '@build_version@ @commit_hash@'
     publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
