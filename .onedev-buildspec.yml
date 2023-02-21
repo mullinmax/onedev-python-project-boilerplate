@@ -1,22 +1,14 @@
 version: 19
 jobs:
-- name: Run Pytests
+- name: PR check
   steps:
-  - !CheckoutStep
-    name: Checkout Code
-    cloneCredential: !DefaultCredential {}
-    withLfs: true
-    withSubmodules: true
+  - !UseTemplateStep
+    name: Execute Tests
+    templateName: Execute Tests
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: Run PyTest
-    runInContainer: true
-    image: python:3.10
-    interpreter: !DefaultInterpreter
-      commands:
-      - pip install -U pytest
-      - pytest
-    useTTY: false
+  - !UseTemplateStep
+    name: Trial Docker Container Build
+    templateName: Trial Docker Container Build
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
@@ -25,7 +17,7 @@ jobs:
   retryDelay: 30
   timeout: 3600
 stepTemplates:
-- name: Build and Test Docker Image
+- name: Checkout Code
   steps:
   - !CheckoutStep
     name: Checkout Code
@@ -33,8 +25,30 @@ stepTemplates:
     withLfs: true
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Execute Tests
+  steps:
+  - !CommandStep
+    name: Run Pytest
+    runInContainer: true
+    image: python:3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - pip install -U pytest
+      - pytest
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Trial Docker Container Build
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
-    name: Build Docker Image
-    tags: '@branch@ @pull_request_number@ @project_name@ @tag@'
+    name: Build Docker Container
+    tags: '@project_name@ branch:@branch@ commit:@commit_hash@ pull_request:@pull_request_number@'
     publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
