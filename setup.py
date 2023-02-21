@@ -1,3 +1,5 @@
+# If you do not want to use a setup.py file you can use a requirements.txt file instead and the build will use that instead
+
 from setuptools import setup, find_packages
 
 setup(
