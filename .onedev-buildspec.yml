@@ -27,6 +27,10 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Run Pytest
     runInContainer: true
@@ -36,10 +40,6 @@ stepTemplates:
       - pip install -U pytest
       - pytest
     useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Trial Docker Container Build
   steps:
