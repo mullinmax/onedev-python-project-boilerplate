@@ -49,6 +49,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Container
-    tags: '@project_name@ branch:@branch@ commit:@commit_hash@ pull_request:@pull_request_number@'
+    tags: commit:@commit_hash@ pull_request:@pull_request_number@
     publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
