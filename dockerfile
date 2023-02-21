@@ -2,7 +2,7 @@
 # This enables the use of a newer syntax version if available
 # More info: https://docs.docker.com/engine/reference/builder/#syntax
 # syntax=docker/dockerfile:1
-FROM python:3.11 # Use the Python 3.11 image as the base image
+FROM python:3.11-slim # Use the Python 3.11 image as the base image
 
 # Sets the maintainer of the project
 MAINTAINER Maxwell Mullin "inbox@max-was-here.com"
