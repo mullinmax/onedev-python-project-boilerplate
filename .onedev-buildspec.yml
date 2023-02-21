@@ -1,7 +1,13 @@
 version: 19
 jobs:
-- name: Run PyTest
+- name: Run Pytests
   steps:
+  - !CheckoutStep
+    name: Checkout Code
+    cloneCredential: !DefaultCredential {}
+    withLfs: true
+    withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Run PyTest
     runInContainer: true
@@ -12,25 +18,21 @@ jobs:
       - pytest
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
-    name: Build Docker Image
-    tags: '@build_number@_pr@pull_request_number@'
-    publish: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-- name: Build Docker Image
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  timeout: 3600
 stepTemplates:
-- name: Build Docker Image
+- name: Build and Test Docker Image
   steps:
+  - !CheckoutStep
+    name: Checkout Code
+    cloneCredential: !DefaultCredential {}
+    withLfs: true
+    withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Image
     tags: '@branch@ @pull_request_number@ @project_name@ @tag@'
