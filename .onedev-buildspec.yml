@@ -46,6 +46,10 @@ stepTemplates:
     name: Set Build Version From Setup.py
     buildVersion: '@script:Python Get Version From Setup.py@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildDescriptionStep
+    name: Set Build Description
+    buildDescription: "version: @build_version@\r\nbranch: @branch@\r\ncommit: @commit_hash@"
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
   - !UseTemplateStep
