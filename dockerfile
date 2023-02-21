@@ -4,7 +4,7 @@
 # syntax=docker/dockerfile:1
 
 # Use the Python 3.11 image as the base image
-FROM python:3.11-slim
+FROM python:3.11
 
 # Sets the maintainer of the project
 MAINTAINER Maxwell Mullin "inbox@max-was-here.com"
