@@ -22,6 +22,10 @@ jobs:
     name: Execute Tests
     templateName: Execute Tests
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Publish Docker Container
+    templateName: Publish Docker Conatiner
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
     branches: master
@@ -67,5 +71,20 @@ stepTemplates:
   - !BuildImageStep
     name: Build Docker Container
     tags: '@build_version@ @commit_hash@'
+    publish: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Publish Docker Conatiner
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Execute Tests
+    templateName: Execute Tests
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: Publish Docker Container
+    tags: '@build_version@'
     publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
