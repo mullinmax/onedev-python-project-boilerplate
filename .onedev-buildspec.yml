@@ -1,13 +1,9 @@
 version: 19
 jobs:
-- name: Test
+- name: Run PyTest
   steps:
-  - !UseTemplateStep
-    name: Extract Versions
-    templateName: checkout and extract versions
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: Run Pytest
+    name: Run PyTest
     runInContainer: true
     image: python:3.10
     interpreter: !DefaultInterpreter
@@ -18,7 +14,7 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Image
-    tags: dev
+    tags: '@build_number@_pr@pull_request_number@'
     publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
@@ -27,23 +23,16 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+- name: Build Docker Image
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
 stepTemplates:
-- name: checkout and extract versions
+- name: Build Docker Image
   steps:
-  - !CheckoutStep
-    name: Checkout Code
-    cloneCredential: !DefaultCredential {}
-    withLfs: false
-    withSubmodules: false
-    checkoutPath: ./src/
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: Extract Versions
-    runInContainer: true
-    image: ubuntu
-    interpreter: !DefaultInterpreter
-      commands:
-      - grep 'python_requires' "./src/setup.py" | awk -F\' '{print $2}' > ./minimum_python_version.txt
-      - grep 'version' "./src/setup.py" | awk -F\' '{print $2}' > ./package_version.txt
-    useTTY: false
+  - !BuildImageStep
+    name: Build Docker Image
+    tags: '@branch@ @pull_request_number@ @project_name@ @tag@'
+    publish: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
