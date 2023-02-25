@@ -1,6 +1,93 @@
 version: 19
+stepTemplates:
+- name: Checkout Code
+  steps:
+  - !CheckoutStep
+    name: Checkout Code
+    cloneCredential: !DefaultCredential {}
+    withLfs: true
+    withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Write Build Version to file:BUILD_VERSION
+    runInContainer: true
+    image: python:3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - python setup.py --version > BUILD_VERSION
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: Set Build Version
+    buildVersion: '@file:BUILD_VERSION@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Set Build Version
+  steps:
+  - !CommandStep
+    name: Write Build Version to file:BUILD_VERSION
+    runInContainer: true
+    image: python 3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - python setup.py --version > BUILD_VERSION
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: Set Build Version
+    buildVersion: '@file:BUILD_VERSION@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Execute Tests
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Run Pytest
+    runInContainer: true
+    image: python:3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - pip install -e .[test]
+      - pytest
+      - ruff check . --fix
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Trial Docker Container Build
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: Build Docker Container
+    tags: '@build_version@'
+    publish: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Push Docker Container to Dockerhub
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Publish to Docker Hub
+    runInContainer: true
+    image: docker
+    interpreter: !DefaultInterpreter
+      commands:
+      - echo @secrets:mullinmax_docker_hub_password@ | docker login -u mullinmax --password-stdin
+      - ''
+      - build_version=@build_version@
+      - echo building mullinmax/@project_name@:$build_version
+      - docker build -t mullinmax/@project_name@:$build_version -t mullinmax/@project_name@:latest
+        .
+      - docker push --all-tags mullinmax/@project_name@
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
-- name: PR check
+- name: PR Tests
+  jobExecutor: docker-executor
   steps:
   - !UseTemplateStep
     name: Execute Tests
@@ -17,14 +104,15 @@ jobs:
   retryDelay: 30
   timeout: 3600
 - name: Update Master
+  jobExecutor: docker-executor
   steps:
   - !UseTemplateStep
     name: Execute Tests
     templateName: Execute Tests
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
-    name: Publish Docker Container
-    templateName: Publish Docker Conatiner
+    name: Push Docker Container to Docker Hub
+    templateName: Push Docker Container to Dockerhub
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
@@ -33,62 +121,3 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-stepTemplates:
-- name: Checkout Code
-  steps:
-  - !CheckoutStep
-    name: Checkout Code
-    cloneCredential: !DefaultCredential {}
-    withLfs: true
-    withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: Set Build Version From Setup.py
-    buildVersion: '@script:Python Get Version From Setup.py@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildDescriptionStep
-    name: Set Build Description
-    buildDescription: "version: @build_version@\r\nbranch: @branch@\r\ncommit: @commit_hash@"
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-- name: Execute Tests
-  steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: Run Pytest
-    runInContainer: true
-    image: python:3.11
-    interpreter: !DefaultInterpreter
-      commands:
-      - pip install -U pytest
-      - pytest
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-- name: Trial Docker Container Build
-  steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
-    name: Build Docker Container
-    tags: '@build_version@ @commit_hash@'
-    publish: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-- name: Publish Docker Conatiner
-  steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
-    name: Execute Tests
-    templateName: Execute Tests
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
-    name: Publish Docker Container
-    tags: '@build_version@'
-    publish: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
