@@ -9,17 +9,11 @@ FROM python:3.11
 # Sets the maintainer of the project
 MAINTAINER FIRST_NAME LAST_NAME "YOUR_EMAIL@gmail.com"
 
-# Set the working directory for the container
-# This is the directory where commands will be executed
-WORKDIR /src
-
-# Copy the contents of the current directory to the container's working directory
-COPY . /src
+# Copy the contents of the repository into the container's root directory
+COPY . /
 
 # Install the project's dependencies
-# If there is a "setup.py" file in the directory, install the project in editable mode
-# Otherwise, install the dependencies listed in "requirements.txt"
-RUN if [ -f setup.py ]; then pip install -e .; else pip install -r requirements.txt; fi
+RUN pip install -e .
 
 # Set the default command to run when the container starts
 # In this case, run the "main.py" script using the Python interpreter
