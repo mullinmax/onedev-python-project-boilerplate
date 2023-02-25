@@ -78,7 +78,7 @@ stepTemplates:
       commands:
       - dockerhub_user=mullinmax
       - build_version=@build_version@
-      - echo @secrets:docker_hub_password@ | docker login -u $dockerhub_user --password-stdin
+      - echo @secrets:dockerhub_password@ | docker login -u $dockerhub_user --password-stdin
       - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
         .
       - docker push --all-tags $dockerhub_user/@project_name@
