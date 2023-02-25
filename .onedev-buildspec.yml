@@ -73,7 +73,7 @@ stepTemplates:
   - !CommandStep
     name: Publish to Docker Hub
     runInContainer: true
-    image: docker
+    image: chko/docker-pushrm
     interpreter: !DefaultInterpreter
       commands:
       - dockerhub_user=mullinmax
@@ -84,10 +84,10 @@ stepTemplates:
       - docker push --all-tags $dockerhub_user/@project_name@
       - ''
       - '# updates dockerhub readme'
-      - mkdir -p $HOME/.docker/cli-plugins/
-      - curl -L https://github.com/christian-korneck/docker-pushrm/releases/latest/download/docker-pushrm_linux_amd64
-        -o $HOME/.docker/cli-plugins/docker-pushrm
-      - chmod +x $HOME/.docker/cli-plugins/docker-pushrm
+      - '#mkdir -p $HOME/.docker/cli-plugins/'
+      - '#curl -L https://github.com/christian-korneck/docker-pushrm/releases/latest/download/docker-pushrm_linux_amd64
+        -o $HOME/.docker/cli-plugins/docker-pushrm'
+      - '#chmod +x $HOME/.docker/cli-plugins/docker-pushrm'
       - docker pushrm $dockerhub_user/@project_name@
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
