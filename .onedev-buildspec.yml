@@ -76,13 +76,12 @@ stepTemplates:
     image: docker
     interpreter: !DefaultInterpreter
       commands:
-      - echo @secrets:mullinmax_docker_hub_password@ | docker login -u mullinmax --password-stdin
-      - ''
+      - dockerhub_user=mullinmax
       - build_version=@build_version@
-      - echo building mullinmax/@project_name@:$build_version
-      - docker build -t mullinmax/@project_name@:$build_version -t mullinmax/@project_name@:latest
+      - echo @secrets:docker_hub_password@ | docker login -u $dockerhub_user --password-stdin
+      - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
         .
-      - docker push --all-tags mullinmax/@project_name@
+      - docker push --all-tags $dockerhub_user/@project_name@
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
