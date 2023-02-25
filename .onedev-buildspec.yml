@@ -73,7 +73,7 @@ stepTemplates:
   - !CommandStep
     name: Publish to Docker Hub
     runInContainer: true
-    image: chko/docker-pushrm
+    image: docker
     interpreter: !DefaultInterpreter
       commands:
       - dockerhub_user=mullinmax
