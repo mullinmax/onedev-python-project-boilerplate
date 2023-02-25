@@ -9,8 +9,12 @@ FROM python:3.11
 # Sets the maintainer of the project
 MAINTAINER FIRST_NAME LAST_NAME "YOUR_EMAIL@gmail.com"
 
-# Copy the contents of the repository into the container's root directory
-COPY . .
+# Set the working directory for the container
+# This is the directory where commands will be executed
+WORKDIR /src
+
+# Copy the contents of the current directory to the container's working directory
+COPY . /src
 
 # Install the project's dependencies
 RUN pip install -e .
