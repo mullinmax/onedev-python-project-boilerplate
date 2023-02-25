@@ -10,7 +10,7 @@ FROM python:3.11
 MAINTAINER FIRST_NAME LAST_NAME "YOUR_EMAIL@gmail.com"
 
 # Copy the contents of the repository into the container's root directory
-COPY . /
+COPY . .
 
 # Install the project's dependencies
 RUN pip install -e .
