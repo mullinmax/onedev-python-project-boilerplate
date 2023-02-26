@@ -1,7 +1,14 @@
 from setuptools import setup, find_packages
+import argparse
+
+# Use argparse to parse the command-line arguments.
+parser = argparse.ArgumentParser()
+parser.add_argument('--sub-version', default='', help='Sub-version to append to the version number ex: "dev45"')
+parser.add_argument('--package-name', default='', help='Overrides package name')
+args, unknown = parser.parse_known_args()
 
 setup_dict = {
-    'name':'onedev-python-project-boilerplate',
+    'name':'onedev-python-project-boilerplate', # This should match your OneDev project name
     'version':'0.1.2', # will get automatically picked up by CI/CD pipeline
     'packages':find_packages(),  # Automatically finds identifies packages in repo to include
     'include_package_data':True,  # if non-Python files should be included
@@ -52,5 +59,13 @@ setup_dict = {
         ],
     }
 }
+
+# If the --sub-version option is provided, append it to the version.
+if args.sub_version:
+    setup_dict['version'] += args.sub_version
+
+# If the --package-name option is provided, overwrite the name
+if args.package_name:
+    setup_dict['name'] = args.package_name
 
 setup(**setup_dict)
