@@ -54,7 +54,7 @@ setup_dict = {
 }
 
 try:
-	with open(BUILD_VERSION, 'r') as file:
+	with open('BUILD_VERSION', 'r') as file:
 		setup_dict['version'] = file.read()
 except FileNotFoundError:
 	pass
