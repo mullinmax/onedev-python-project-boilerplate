@@ -18,8 +18,8 @@ stepTemplates:
       - ''
       - CURRENT_BRANCH=$(git branch --show-current)
       - if [ "$CURRENT_BRANCH" != "master" ]; then
-      - '  BUILD_VERSION+=$CURRENT_BRANCH'
-      - '  BUILD_VERSION+=''@build_number@'''
+      - '  export BUILD_VERSION+=$CURRENT_BRANCH'
+      - '  export BUILD_VERSION+=''@build_number@'''
       - fi
       - echo "$BUILD_VERSION" > BUILD_VERSION
       - echo "$BUILD_VERSION"
