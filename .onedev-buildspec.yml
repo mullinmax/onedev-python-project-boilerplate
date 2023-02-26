@@ -82,6 +82,7 @@ stepTemplates:
       - pip install setuptools wheel twine
       - python setup.py sdist bdist_wheel
       - '# wrapped in quotes to prevent issues with $ in passwords'
+      - ls -R
       - twine upload dist/* -u @secret:pypi_user@ -p '@secret:pypi_password@'
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
