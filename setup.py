@@ -3,12 +3,12 @@ import argparse
 
 # Use argparse to parse the command-line arguments.
 parser = argparse.ArgumentParser()
-parser.add_argument('--sub-version', default='', help='Sub-version to append to the version number ex: "dev45"')
-parser.add_argument('--package-name', default='', help='Overrides package name')
+parser.add_argument('--version', default='', help='overwrite the version number (use for appending "dev24")')
+parser.add_argument('--name', default='', help='overwrite the package name')
 args, unknown = parser.parse_known_args()
 
 setup_dict = {
-    'name':'onedev-python-project-boilerplate', # This should match your OneDev project name
+    'name':'onedev-python-project-boilerplate', # This should match your OneDev project name (CI/CD pipeline will override)
     'version':'0.1.2', # will get automatically picked up by CI/CD pipeline
     'packages':find_packages(),  # Automatically finds identifies packages in repo to include
     'include_package_data':True,  # if non-Python files should be included
@@ -60,9 +60,12 @@ setup_dict = {
     }
 }
 
-# If the --sub-version option is provided, append it to the version.
-if args.sub_version:
-    setup_dict['version'] += args.sub_version
+# If the --sub-version option is provided, overwrite the version.
+if args.version:
+	if setup_dict['version'] in args.version:
+    	setup_dict['version'] = args.version
+	else:
+		raise Exception(f'Failed to update version: {setup_dict['version']} => {args.version} is not a build-level update')
 
 # If the --package-name option is provided, overwrite the name
 if args.package_name:
