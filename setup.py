@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 setup_dict = {
-    'name':'project name',
+    'name':'onedev-python-project-boilerplate',
     'version':'0.0.0', # will get automatically picked up by CI/CD pipeline
     'packages':find_packages(),  # Automatically finds identifies packages in repo to include
     'include_package_data':True,  # if non-Python files should be included
     'description':'A short description of your project',
 	'long_description':open('README.md').read(),
 	'long_description_content_type':'text/markdown',
-    'author':'Your Name',  # author of your project
-    'author_email':'Your Email',  # author's email address
+    #'author':'Your Name',  # author of your project
+    #'author_email':'Your Email',  # author's email address
 	'license':'MIT',
 	'classifiers':[
 		# https://pypi.org/classifiers/
