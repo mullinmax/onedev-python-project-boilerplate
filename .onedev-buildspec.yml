@@ -155,6 +155,10 @@ jobs:
     name: Publish Package on PyPI
     templateName: Publish Package on Pypi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Sync to Github
+    templateName: Sync to GitHub
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
     branches: master
