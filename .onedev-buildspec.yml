@@ -110,7 +110,7 @@ stepTemplates:
     templateName: Checkout Code
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: Sync to GitHub
+    name: Sync master to GitHub
     runInContainer: true
     image: alpine/git:1.0.7
     interpreter: !DefaultInterpreter
@@ -120,7 +120,8 @@ stepTemplates:
       - gh_token=@secrets:github_token@
       - '#git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
         HEAD:main'
-      - git push -f https://github.com/$gh_user/@project_name@.git HEAD:main
+      - git checkout master
+      - git push -f https://github.com/$gh_user/@project_name@.git HEAD:master
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
