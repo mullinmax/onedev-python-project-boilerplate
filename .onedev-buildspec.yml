@@ -121,13 +121,20 @@ stepTemplates:
     image: alpine/git:1.0.7
     interpreter: !DefaultInterpreter
       commands:
-      - git config --global --unset http.extraHeader
-      - gh_user=@secrets:github_user@
-      - gh_token=@secrets:github_token@
+      - '#git config --global --unset http.extraHeader'
+      - '#gh_user=@secrets:github_user@'
+      - '#gh_token=@secrets:github_token@'
       - '#git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
         HEAD:main'
-      - git push -f https://github.com/$gh_user/@project_name@.git HEAD:main
+      - '#git push -f https://github.com/$gh_user/@project_name@.git HEAD:main'
     useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PushRepository
+    name: Sync to Github
+    remoteUrl: https://github.com/@secret:github_user@/@project_name@.git
+    passwordSecret: github_token
+    withLfs: true
+    force: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
 - name: Pull Request Review
@@ -147,7 +154,7 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-- name: Update Master
+- name: Update Master or Dev
   jobExecutor: docker-executor
   steps:
   - !UseTemplateStep
@@ -163,12 +170,12 @@ jobs:
     templateName: Publish Package on Pypi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
-    name: Sync to Github
+    name: Sync master to Github
     templateName: Sync to GitHub
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
-    branches: master
+    branches: master dev
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
