@@ -76,19 +76,33 @@ stepTemplates:
     image: docker
     interpreter: !DefaultInterpreter
       commands:
-      - dockerhub_user=mullinmax
+      - dockerhub_user=@secret:docker_hub_user@
       - build_version=@build_version@
       - echo @secrets:dockerhub_password@ | docker login -u $dockerhub_user --password-stdin
       - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
         .
       - docker push --all-tags $dockerhub_user/@project_name@
-      - ''
-      - '# updates dockerhub readme'
-      - '#mkdir -p $HOME/.docker/cli-plugins/'
-      - '#curl -L https://github.com/christian-korneck/docker-pushrm/releases/latest/download/docker-pushrm_linux_amd64
-        -o $HOME/.docker/cli-plugins/docker-pushrm'
-      - '#chmod +x $HOME/.docker/cli-plugins/docker-pushrm'
-      - '#docker pushrm $dockerhub_user/@project_name@'
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Publish Package on Pypi
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Execute Tests
+    templateName: Execute Tests
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Publish to PyPI
+    runInContainer: true
+    image: python:3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - pip install setuptools wheel twine
+      - python setup.py sdist bdist_wheel
+      - twine upload dist/* --username @secret:pypi_user@ --password @secret:pypi_password@
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
@@ -119,6 +133,10 @@ jobs:
   - !UseTemplateStep
     name: Push Docker Container to Docker Hub
     templateName: Push Docker Container to Dockerhub
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: Publish Package on PyPI
+    templateName: Publish Package on Pypi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
