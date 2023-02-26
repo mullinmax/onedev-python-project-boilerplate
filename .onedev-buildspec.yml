@@ -29,10 +29,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
-  - !UseTemplateStep
-    name: Checkout Code and Set Build Version
-    templateName: Checkout Code and Set Build Version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Run Pytest
     runInContainer: true
@@ -46,10 +42,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Trial Docker Container Build
   steps:
-  - !UseTemplateStep
-    name: Checkout Code and Set Build Version
-    templateName: Checkout Code and Set Build Version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Container
     tags: '@build_version@'
@@ -57,10 +49,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Push Docker Container to Dockerhub
   steps:
-  - !UseTemplateStep
-    name: Checkout Code and Set Build Version
-    templateName: Checkout Code and Set Build Version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Publish to Docker Hub
     runInContainer: true
@@ -78,10 +66,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Publish Package on Pypi
   steps:
-  - !UseTemplateStep
-    name: Checkout Code and Set Build Version
-    templateName: Checkout Code and Set Build Version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Publish to PyPI
     runInContainer: true
@@ -96,10 +80,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Sync to GitHub
   steps:
-  - !UseTemplateStep
-    name: Checkout Code and Set Build Version
-    templateName: Checkout Code and Set Build Version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Sync to GitHub
     runInContainer: true
@@ -142,6 +122,10 @@ jobs:
 - name: Update Master or Dev
   jobExecutor: docker-executor
   steps:
+  - !UseTemplateStep
+    name: Checkout Code and Set Build Version
+    templateName: Checkout Code and Set Build Version
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
     name: Execute Tests
     templateName: Execute Tests
