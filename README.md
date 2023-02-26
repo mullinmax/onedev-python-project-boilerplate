@@ -8,6 +8,10 @@ This project aims to make the building, and deployment of python packages and do
 - publish to pypi
 - sync with github
 
+## TODO
+
+ - add shields.io
+
 ## How to Setup
 
 - Make a copy/fork of this repository
