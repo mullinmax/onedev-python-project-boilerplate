@@ -78,7 +78,8 @@ stepTemplates:
       commands:
       - dockerhub_user=@secret:docker_hub_user@
       - build_version=@build_version@
-      - echo @secrets:docker_hub_password@ | docker login -u $dockerhub_user --password-stdin
+      - '# wrapped in quotes to prevent issues with $ in passwords'
+      - echo '@secrets:docker_hub_password@' | docker login -u $dockerhub_user --password-stdin
       - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
         .
       - docker push --all-tags $dockerhub_user/@project_name@
@@ -98,7 +99,8 @@ stepTemplates:
       commands:
       - pip install setuptools wheel twine
       - python setup.py sdist bdist_wheel
-      - twine upload dist/* --username @secret:pypi_user@ --password @secret:pypi_password@
+      - '# wrapped in quotes to prevent issues with $ in passwords'
+      - twine upload dist/* -u @secret:pypi_user@ -p '@secret:pypi_password@'
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
