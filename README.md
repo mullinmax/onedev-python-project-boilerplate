@@ -11,6 +11,7 @@ This project aims to make the building, and deployment of python packages and do
 ## TODO
 
  - add shields.io
+ - branch protection settings setup
 
 ## How to Setup
 
