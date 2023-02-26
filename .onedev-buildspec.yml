@@ -103,6 +103,25 @@ stepTemplates:
       - twine upload dist/* -u @secret:pypi_user@ -p '@secret:pypi_password@'
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+- name: Sync to GitHub
+  steps:
+  - !UseTemplateStep
+    name: Checkout Code
+    templateName: Checkout Code
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Sync to GitHub
+    runInContainer: true
+    image: alpine/git:1.0.7
+    interpreter: !DefaultInterpreter
+      commands:
+      - git config --global --unset http.extraHeader
+      - gh_user=@secrets:github_user@
+      - gh_token=@secrets:github_token@
+      - git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
+        HEAD:main
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
 - name: PR Tests
   jobExecutor: docker-executor
