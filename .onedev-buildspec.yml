@@ -15,11 +15,11 @@ stepTemplates:
     interpreter: !DefaultInterpreter
       commands:
       - CURRENT_BRANCH=$(git branch --show-current)
-      - '#if [ "$CURRENT_BRANCH" != "master" ]; then'
-      - export BUILD_VERSION="$(python setup.py --version)$CURRENT_BRANCH@build_number@"
-      - '#else'
-      - '#  export BUILD_VERSION="$(python setup.py --version)"'
-      - '#fi'
+      - if [ "$CURRENT_BRANCH" != "master" ]; then
+      - "\texport BUILD_VERSION=\"$(python setup.py --version)$CURRENT_BRANCH@build_number@\""
+      - else
+      - '  export BUILD_VERSION="$(python setup.py --version)"'
+      - fi
       - echo "$BUILD_VERSION" > BUILD_VERSION
       - echo "$BUILD_VERSION"
     useTTY: false
