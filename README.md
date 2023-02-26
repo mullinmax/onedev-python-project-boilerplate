@@ -2,6 +2,12 @@
 
 This project aims to make the building, and deployment of python packages and docker containers using OneDev as simple as possible.
 
+## Features
+
+- publish to docker hub
+- publish to pypi
+- sync with github
+
 ## How to Setup
 
 - Make a copy/fork of this repository
