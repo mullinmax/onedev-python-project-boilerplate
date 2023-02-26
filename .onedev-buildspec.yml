@@ -80,7 +80,8 @@ stepTemplates:
     interpreter: !DefaultInterpreter
       commands:
       - pip install setuptools wheel twine
-      - python setup.py --name @project_name@ --version @build_version@ sdist bdist_wheel
+      - python setup.py --name '@project_name@' --version '@build_version@' sdist
+        bdist_wheel
       - '# wrapped in quotes to prevent issues with $ in passwords'
       - ls -R
       - twine upload dist/* -u @secret:pypi_user@ -p '@secret:pypi_password@'
