@@ -14,11 +14,12 @@ stepTemplates:
     image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
+      - export BUILD_VERSION="$(python setup.py --version)"
+      - ''
       - CURRENT_BRANCH=$(git branch --show-current)
       - if [ "$CURRENT_BRANCH" != "master" ]; then
-      - "\texport BUILD_VERSION=\"$(python setup.py --version)$CURRENT_BRANCH@build_number@\""
-      - else
-      - '  export BUILD_VERSION="$(python setup.py --version)"'
+      - '  BUILD_VERSION+=$CURRENT_BRANCH'
+      - '  BUILD_VERSION+=''@build_number@'''
       - fi
       - echo "$BUILD_VERSION" > BUILD_VERSION
       - echo "$BUILD_VERSION"
