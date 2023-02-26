@@ -63,9 +63,9 @@ setup_dict = {
 # If the --sub-version option is provided, overwrite the version.
 if args.version:
 	if setup_dict['version'] in args.version:
-    	setup_dict['version'] = args.version
+		setup_dict['version'] = args.version
 	else:
-		raise Exception(f'Failed to update version: {setup_dict['version']} => {args.version} is not a build-level update')
+		raise Exception(f'Failed to update version: {setup_dict["version"]} => {args.version} is not a build-level update')
 
 # If the --package-name option is provided, overwrite the name
 if args.package_name:
