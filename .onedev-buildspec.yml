@@ -21,6 +21,7 @@ stepTemplates:
       - if [ "$CURRENT_BRANCH" != "master" ]; then
       - "\texport BUILD_VERSION=\"${PACKAGE_VERSION}${CURRENT_BRANCH}${BUILD_NUMBER}\""
       - "  \techo \"$BUILD_VERSION\" > BUILD_VERSION"
+      - "\techo \"$BUILD_NUMBER\""
       - "\techo \"$BUILD_VERSION\""
       - else
       - export BUILD_VERSION="${PACKAGE_VERSION}"
