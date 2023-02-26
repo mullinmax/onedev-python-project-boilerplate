@@ -3,8 +3,8 @@ import argparse
 
 # Use argparse to parse the command-line arguments.
 parser = argparse.ArgumentParser()
-parser.add_argument('--version', default='', help='overwrite the version number (use for appending "dev24")')
-parser.add_argument('--name', default='', help='overwrite the package name')
+parser.add_argument('--set-version', default='', help='overwrite the version number (use for appending "dev24")')
+parser.add_argument('--set-name', default='', help='overwrite the package name')
 args, unknown = parser.parse_known_args()
 
 setup_dict = {
@@ -60,15 +60,15 @@ setup_dict = {
     }
 }
 
-# If the --sub-version option is provided, overwrite the version.
-if args.version:
-	if setup_dict['version'] in args.version:
-		setup_dict['version'] = args.version
+# If the --set-version option is provided, overwrite the version.
+if args.set_version:
+	if setup_dict['version'] in args.set_version:
+		setup_dict['version'] = args.set_version
 	else:
-		raise Exception(f'Failed to update version: {setup_dict["version"]} => {args.version} is not a build-level update')
+		raise Exception(f'Failed to update version: {setup_dict["version"]} => {args.set_version} is not a build-level update')
 
-# If the --name option is provided, overwrite the name
-if args.name:
-    setup_dict['name'] = args.name
+# If the --set-name option is provided, overwrite the name
+if args.set_name:
+    setup_dict['name'] = args.set_name
 
 setup(**setup_dict)
