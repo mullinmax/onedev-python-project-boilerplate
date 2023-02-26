@@ -23,7 +23,11 @@ This project aims to make the building, and deployment of python packages and do
             - add command to run test suite(s) if not pytest
         - Publish Docker Container to Dockerhub: publish to dockerhub:
             - update username to your dockerhub username
-    - Under `Settings > Build > Job Secrets` add your dockerhub password as dockerhub_password
+    - Under `Settings > Build > Job Secrets` add
+      - your docker hub password as `docker_hub_password`
+      - your docker hub password as `docker_hub_user`
+      - your pypi password as `pypi_password`
+      - your pypi user as `pypi_user`
     - If there isn't already, make a 'Server Docker Executor' called `docker-executor` under `Administration > Job Executors`
 - fill in your `README.md` and remove this section
 
