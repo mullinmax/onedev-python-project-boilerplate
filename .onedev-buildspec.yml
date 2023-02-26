@@ -118,8 +118,9 @@ stepTemplates:
       - git config --global --unset http.extraHeader
       - gh_user=@secrets:github_user@
       - gh_token=@secrets:github_token@
-      - git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
-        HEAD:main
+      - '#git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
+        HEAD:main'
+      - git push -f https://github.com/$gh_user/@project_name@.git HEAD:main
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
