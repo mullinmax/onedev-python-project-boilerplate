@@ -26,10 +26,16 @@ stepTemplates:
   - !CommandStep
     name: Write Build Version to file:BUILD_VERSION
     runInContainer: true
-    image: python 3.11
+    image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
-      - python setup.py --version > BUILD_VERSION
+      - CURRENT_BRANCH=$(git branch --show-current)
+      - if [ "$CURRENT_BRANCH" != "master" ]; then
+      - '  export BUILD_VERSION="$(python setup.py --version)$CURRENT_BRANCH@build_number@"'
+      - else
+      - '  export BUILD_VERSION="$(python setup.py --version)"'
+      - fi
+      - echo "$BUILD_VERSION" > BUILD_VERSION
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
@@ -124,7 +130,7 @@ stepTemplates:
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
-- name: PR Tests
+- name: Pull Request Review
   jobExecutor: docker-executor
   steps:
   - !UseTemplateStep
