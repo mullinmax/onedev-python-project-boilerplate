@@ -32,7 +32,7 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
     name: Set Build Version
-    buildVersion: '@file:BUILD_VERSION@@branch@'
+    buildVersion: '@file:BUILD_VERSION@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
