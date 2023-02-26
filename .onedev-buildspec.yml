@@ -14,15 +14,19 @@ stepTemplates:
     image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
-      - export BUILD_VERSION="$(python setup.py --version)"
-      - ''
+      - PACKAGE_VERSION="$(python setup.py --version)"
+      - BUILD_NUMBER="@build_number@"
       - CURRENT_BRANCH=$(git branch --show-current)
+      - ''
       - if [ "$CURRENT_BRANCH" != "master" ]; then
-      - '  export BUILD_VERSION+=$CURRENT_BRANCH'
-      - '  export BUILD_VERSION+=''@build_number@'''
+      - "\texport BUILD_VERSION=\"${PACKAGE_VERSION}${CURRENT_BRANCH}${BUILD_NUMBER}\""
+      - "  \techo \"$BUILD_VERSION\" > BUILD_VERSION"
+      - "\techo \"$BUILD_VERSION\""
+      - else
+      - export BUILD_VERSION="${PACKAGE_VERSION}"
+      - "  \techo \"$BUILD_VERSION\" > BUILD_VERSION"
+      - "\techo \"$BUILD_VERSION\""
       - fi
-      - echo "$BUILD_VERSION" > BUILD_VERSION
-      - echo "$BUILD_VERSION"
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
