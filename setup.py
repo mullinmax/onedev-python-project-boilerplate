@@ -1,11 +1,4 @@
 from setuptools import setup, find_packages
-import argparse
-
-# Use argparse to parse the command-line arguments.
-parser = argparse.ArgumentParser()
-parser.add_argument('--set-version', default='', help='overwrite the version number (use for appending "dev24")')
-parser.add_argument('--set-name', default='', help='overwrite the package name')
-args, unknown = parser.parse_known_args()
 
 setup_dict = {
     'name':'onedev-python-project-boilerplate', # This should match your OneDev project name (CI/CD pipeline will override)
@@ -60,15 +53,10 @@ setup_dict = {
     }
 }
 
-# If the --set-version option is provided, overwrite the version.
-if args.set_version:
-	if setup_dict['version'] in args.set_version:
-		setup_dict['version'] = args.set_version
-	else:
-		raise Exception(f'Failed to update version: {setup_dict["version"]} => {args.set_version} is not a build-level update')
-
-# If the --set-name option is provided, overwrite the name
-if args.set_name:
-    setup_dict['name'] = args.set_name
+try:
+	with open(BUILD_VERSION, 'r') as file:
+		setup_dict['version'] = file.read()
+except FileNotFoundError:
+	pass
 
 setup(**setup_dict)
