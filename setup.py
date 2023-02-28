@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup_dict = {
-    'name':'onedev-python-project-boilerplate',
-    'version':'0.1.0', # will get automatically picked up by CI/CD pipeline
+    'name':'onedev-python-project-boilerplate', # This should match your OneDev project name
+    'version':'0.1.2', # will get automatically picked up by CI/CD pipeline
     'packages':find_packages(),  # Automatically finds identifies packages in repo to include
     'include_package_data':True,  # if non-Python files should be included
     'description':'A short description of your project',
@@ -38,11 +38,11 @@ setup_dict = {
 	],
     'python_requires':'>=3.6',  # min and max supported versions of Python
     'install_requires':[  # packages required to run your project
-        'flask',
-        'waitress',
-        'markdown',
-        'beautifulsoup4',
-        'pygments'
+        #'flask',
+        #'waitress',
+        #'markdown',
+        #'beautifulsoup4',
+        #'pygments'
     ],
     'extras_require':{  # optional dependencies for building or testing your project
         'test':[
@@ -52,5 +52,11 @@ setup_dict = {
         ],
     }
 }
+
+try:
+	with open('BUILD_VERSION', 'r') as file:
+		setup_dict['version'] = file.read()
+except FileNotFoundError:
+	pass
 
 setup(**setup_dict)

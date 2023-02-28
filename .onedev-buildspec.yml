@@ -1,6 +1,6 @@
 version: 19
 stepTemplates:
-- name: Checkout Code
+- name: Checkout Code and Set Build Version
   steps:
   - !CheckoutStep
     name: Checkout Code
@@ -14,22 +14,29 @@ stepTemplates:
     image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
-      - python setup.py --version > BUILD_VERSION
+      - PACKAGE_VERSION="$(python setup.py --version)"
+      - BUILD_NUMBER="@build_number@"
+      - CURRENT_BRANCH=$(git branch --show-current)
+      - ''
+      - if [ "$CURRENT_BRANCH" != "master" ]; then
+      - "\texport BUILD_VERSION=\"${PACKAGE_VERSION}${CURRENT_BRANCH}${BUILD_NUMBER}\""
+      - "  \techo \"$BUILD_VERSION\" > BUILD_VERSION"
+      - "\techo \"$BUILD_NUMBER\""
+      - "\techo \"$BUILD_VERSION\""
+      - else
+      - export BUILD_VERSION="${PACKAGE_VERSION}"
+      - "  \techo \"$BUILD_VERSION\" > BUILD_VERSION"
+      - "\techo \"$BUILD_VERSION\""
+      - fi
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: Set Build Version
-    buildVersion: '@file:BUILD_VERSION@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-- name: Set Build Version
-  steps:
   - !CommandStep
-    name: Write Build Version to file:BUILD_VERSION
+    name: Write Project Name to File:PROJECT_NAME
     runInContainer: true
-    image: python 3.11
+    image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
-      - python setup.py --version > BUILD_VERSION
+      - python setup.py --name > PROJECT_NAME
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
@@ -38,16 +45,14 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Execute Tests
   steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Run Pytest
     runInContainer: true
     image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
+      - pwd
+      - ls -R
       - pip install -e .[test]
       - pytest
       - ruff check . --fix
@@ -55,10 +60,6 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Trial Docker Container Build
   steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build Docker Container
     tags: '@build_version@'
@@ -66,31 +67,23 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Push Docker Container to Dockerhub
   steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: Publish to Docker Hub
+    name: Publish to DockerHub
     runInContainer: true
     image: docker
     interpreter: !DefaultInterpreter
       commands:
-      - dockerhub_user=@secret:docker_hub_user@
+      - dockerhub_user=@secret:dockerhub_user@
       - build_version=@build_version@
       - '# wrapped in quotes to prevent issues with $ in passwords'
-      - echo '@secrets:docker_hub_password@' | docker login -u $dockerhub_user --password-stdin
-      - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
+      - echo '@secrets:dockerhub_password@' | docker login -u $dockerhub_user --password-stdin
+      - docker build -t $dockerhub_user/@file:PROJECT_NAME@:$build_version -t $dockerhub_user/@file:PROJECT_NAME@:latest
         .
       - docker push --all-tags $dockerhub_user/@project_name@
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Publish Package on Pypi
   steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Publish to PyPI
     runInContainer: true
@@ -98,36 +91,42 @@ stepTemplates:
     interpreter: !DefaultInterpreter
       commands:
       - pip install setuptools wheel twine
-      - python setup.py --version @build_version@ sdist bdist_wheel
+      - python setup.py sdist bdist_wheel
       - '# wrapped in quotes to prevent issues with $ in passwords'
       - twine upload dist/* -u @secret:pypi_user@ -p '@secret:pypi_password@'
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 - name: Sync to GitHub
   steps:
-  - !UseTemplateStep
-    name: Checkout Code
-    templateName: Checkout Code
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: Sync master to GitHub
     runInContainer: true
     image: alpine/git:1.0.7
     interpreter: !DefaultInterpreter
       commands:
-      - git config --global --unset http.extraHeader
-      - gh_user=@secrets:github_user@
-      - gh_token=@secrets:github_token@
+      - '#git config --global --unset http.extraHeader'
+      - '#gh_user=@secrets:github_user@'
+      - '#gh_token=@secrets:github_token@'
       - '#git push -f https://$gh_user:$gh_token@@github.com/$gh_user/@project_name@.git
         HEAD:main'
-      - git checkout master
-      - git push -f https://github.com/$gh_user/@project_name@.git HEAD:master
+      - '#git push -f https://github.com/$gh_user/@project_name@.git HEAD:main'
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PushRepository
+    name: Sync to Github
+    remoteUrl: https://github.com/@secret:github_user@/@file:PROJECT_NAME@.git
+    passwordSecret: github_token
+    withLfs: true
+    force: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
 jobs:
-- name: PR Tests
+- name: Pull Request Review
   jobExecutor: docker-executor
   steps:
+  - !UseTemplateStep
+    name: Checkout Code and Set Build Version
+    templateName: Checkout Code and Set Build Version
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
     name: Execute Tests
     templateName: Execute Tests
@@ -142,15 +141,19 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-- name: Update Master
+- name: Update Master or Dev
   jobExecutor: docker-executor
   steps:
+  - !UseTemplateStep
+    name: Checkout Code and Set Build Version
+    templateName: Checkout Code and Set Build Version
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
     name: Execute Tests
     templateName: Execute Tests
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
-    name: Push Docker Container to Docker Hub
+    name: Push Docker Container to DockerHub
     templateName: Push Docker Container to Dockerhub
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
@@ -158,12 +161,12 @@ jobs:
     templateName: Publish Package on Pypi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
-    name: Sync to Github
+    name: Sync master to Github
     templateName: Sync to GitHub
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
-    branches: master
+    branches: master dev
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
