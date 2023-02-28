@@ -9,7 +9,7 @@ This project aims to make the building, and deployment of python packages and do
 - sync with GitHub
 
 ## TODO
-
+ 
  - add shields.io
  - branch protection settings setup
 
