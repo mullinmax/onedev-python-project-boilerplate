@@ -51,6 +51,8 @@ stepTemplates:
     image: python:3.11
     interpreter: !DefaultInterpreter
       commands:
+      - pwd
+      - ls -R
       - pip install -e .[test]
       - pytest
       - ruff check . --fix
