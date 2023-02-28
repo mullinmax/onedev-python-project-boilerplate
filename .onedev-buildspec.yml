@@ -122,6 +122,10 @@ jobs:
   jobExecutor: docker-executor
   steps:
   - !UseTemplateStep
+    name: Checkout Code and Set Build Version
+    templateName: Checkout Code and Set Build Version
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
     name: Execute Tests
     templateName: Execute Tests
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
