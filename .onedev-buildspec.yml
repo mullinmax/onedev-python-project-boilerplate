@@ -30,6 +30,15 @@ stepTemplates:
       - fi
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Write Project Name to File:PROJECT_NAME
+    runInContainer: true
+    image: python:3.11
+    interpreter: !DefaultInterpreter
+      commands:
+      - python setup.py --name > PROJECT_NAME
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
     name: Set Build Version
     buildVersion: '@file:BUILD_VERSION@'
@@ -66,7 +75,7 @@ stepTemplates:
       - build_version=@build_version@
       - '# wrapped in quotes to prevent issues with $ in passwords'
       - echo '@secrets:dockerhub_password@' | docker login -u $dockerhub_user --password-stdin
-      - docker build -t $dockerhub_user/@project_name@:$build_version -t $dockerhub_user/@project_name@:latest
+      - docker build -t $dockerhub_user/@file:PROJECT_NAME@:$build_version -t $dockerhub_user/@file:PROJECT_NAME@:latest
         .
       - docker push --all-tags $dockerhub_user/@project_name@
     useTTY: false
@@ -103,7 +112,7 @@ stepTemplates:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PushRepository
     name: Sync to Github
-    remoteUrl: https://github.com/@secret:github_user@/@project_name@.git
+    remoteUrl: https://github.com/@secret:github_user@/@file:PROJECT_NAME@.git
     passwordSecret: github_token
     withLfs: true
     force: true
