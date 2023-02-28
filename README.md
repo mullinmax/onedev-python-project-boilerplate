@@ -16,9 +16,9 @@ This project aims to make the building, and deployment of python packages and do
 ## How to Setup
 
 - Make a new OneDev repository and copy the contents of this repository into it. 
-  - **Note: the project name is used in the CI/CD pipelines to push to DockerHub, and GitHub. If they do not match the pipeline will break**
 - Update the following values in setup.py:
-    - name
+    - name   
+        - **note: this sets the name used on DockerHub, PyPI, and GitHub**
     - version
     - description
     - author
